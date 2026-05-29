@@ -4,13 +4,15 @@ AMI_ID=ami-0220d79f3f480ecf5
 ZONE_ID=Z00196182YF3GPU65OI8D
 DOMAIN_NAME=matamma.online
 
-for instane in $@
+for instance in $@
 do
     echo "Creating $instance instance"  
+    APP_SG=$(aws ec2 describe-security-groups \ --filters Name=group-name,Values=roboshop-$instance \ --query 'SecurityGroups[0].GroupId' \ --output text)
     INSTANCE_ID=$(aws ec2 run-instances \
         --image-id ami-0220d79f3f480ecf5 \
         --instance-type t3.micro \
-        --security-groups "roboshop-common" "roboshop-$instance" \
+        --security-group-ids "sg-0358cd87046f2d652" "$APP_SG" \
+        --subnet-id subnet-0bcdf0124041a31dc \
         --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=roboshop-$instance}]" \
         --query 'Instances[0].InstanceId' \
         --output text
